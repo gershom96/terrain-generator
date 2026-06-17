@@ -6,6 +6,7 @@ import numpy as np
 from typing import Tuple, Callable
 import trimesh
 import functools
+import os
 
 from .indoor_parts import create_stairs_mesh
 from .basic_parts import (
@@ -88,17 +89,20 @@ def create_mesh_tile(cfg: MeshPartsCfg) -> MeshTile:
 
 
 def create_mesh_pattern(cfg: MeshPattern) -> dict:
-    import ray
-
-    ray.init(ignore_reinit_error=True)
-    create_mesh_tile_remote = ray.remote(create_mesh_tile)
-
     tiles = []
     print("Creating mesh pattern... ")
-    for mesh_cfg in cfg.mesh_parts:
-        tiles.append(create_mesh_tile_remote.remote(mesh_cfg))
-    print("Waiting for parallel creation... ")
-    tiles = ray.get(tiles)
+    if os.environ.get("TERRAIN_GENERATOR_USE_RAY") == "1":
+        import ray
+
+        ray.init(ignore_reinit_error=True)
+        create_mesh_tile_remote = ray.remote(create_mesh_tile)
+        for mesh_cfg in cfg.mesh_parts:
+            tiles.append(create_mesh_tile_remote.remote(mesh_cfg))
+        print("Waiting for parallel creation... ")
+        tiles = ray.get(tiles)
+    else:
+        for mesh_cfg in cfg.mesh_parts:
+            tiles.append(create_mesh_tile(mesh_cfg))
     all_tiles = []
     for i, tile in enumerate(tiles):
         mesh_cfg = cfg.mesh_parts[i]

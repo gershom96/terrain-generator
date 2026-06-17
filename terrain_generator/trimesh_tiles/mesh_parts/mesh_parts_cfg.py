@@ -5,7 +5,7 @@
 import numpy as np
 import trimesh
 from typing import Tuple, Optional, Union, Literal
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 
 @dataclass
@@ -52,14 +52,14 @@ class StairMeshPartsCfg(MeshPartsCfg):
         direction: str = "up"
         attach_side: str = "left"
 
-    stairs: Tuple[Stair, ...] = (Stair(),)
+    stairs: Tuple[Stair, ...] = field(default_factory=lambda: (Stair(),))
     wall: Optional[WallPartsCfg] = None
 
 
 @dataclass
 class PlatformMeshPartsCfg(MeshPartsCfg):
-    array: np.ndarray = np.zeros((2, 2))
-    z_dim_array: np.ndarray = np.zeros((2, 2))
+    array: np.ndarray = field(default_factory=lambda: np.zeros((2, 2)))
+    z_dim_array: np.ndarray = field(default_factory=lambda: np.zeros((2, 2)))
     arrays: Optional[Tuple[np.ndarray, ...]] = None  # Additional arrays
     z_dim_arrays: Optional[Tuple[np.ndarray, ...]] = None  # Additional arrays
     add_floor: bool = True
@@ -69,7 +69,7 @@ class PlatformMeshPartsCfg(MeshPartsCfg):
 
 @dataclass
 class HeightMapMeshPartsCfg(MeshPartsCfg):
-    height_map: np.ndarray = np.ones((10, 10))
+    height_map: np.ndarray = field(default_factory=lambda: np.ones((10, 10)))
     add_floor: bool = True
     vertical_scale: float = 1.0
     slope_threshold: float = 4.0
@@ -83,8 +83,8 @@ class HeightMapMeshPartsCfg(MeshPartsCfg):
 
 @dataclass
 class OverhangingMeshPartsCfg(MeshPartsCfg):
-    connection_array: np.ndarray = np.zeros((3, 3))
-    height_array: Optional[np.ndarray] = np.zeros((3, 3))  # Height array of the terrain.
+    connection_array: np.ndarray = field(default_factory=lambda: np.zeros((3, 3)))
+    height_array: Optional[np.ndarray] = field(default_factory=lambda: np.zeros((3, 3)))  # Height array of the terrain.
     mesh: Optional[trimesh.Trimesh] = None  # Mesh of the terrain.
     obstacle_type: str = "wall"  # wall, window, door
 
@@ -122,7 +122,7 @@ class FloatingBoxesPartsCfg(OverhangingMeshPartsCfg):
 class MeshPattern:
     # name: str
     dim: Tuple[float, float, float] = (2.0, 2.0, 2.0)  # x, y, z
-    mesh_parts: Tuple[MeshPartsCfg, ...] = (MeshPartsCfg(),)
+    mesh_parts: Tuple[MeshPartsCfg, ...] = field(default_factory=lambda: (MeshPartsCfg(),))
 
 
 @dataclass
